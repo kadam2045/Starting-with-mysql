@@ -16,19 +16,47 @@ connection.connect((err) => {
   }
   console.log("Connected to MySQL");
 
-  const creationQuery = `CREATE TABLE IF NOT EXISTS users (
+  const userTableQuery = `CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL,
     password VARCHAR(255) NOT NULL
   )`;
 
-  connection.execute(creationQuery, (err, result) => {
-    if (err) {
-      console.log(err);
-      return;
-    }
-    console.log(result);
+  const busesTableQuery = `CREATE TABLE IF NOT EXISTS buses (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    busNumber INT NOT NULL,
+    totalSeats INT NOT NULL,
+    availableSeats INT NOT NULL,
+  )`;
+
+  const bookingTableQuery = `CREATE TABLE IF NOT EXISTS bookings (
+    id INT PRIMARY KEY,
+    seatNumber INT NOT NULL,  
+  )`;
+
+  const payementsTableQuery = `CREATE TABLE IF NOT EXISTS payements (
+    id INT PRIMARY KEY,
+    amountPaid INT NOT NULL,
+    paymentStatus VARCHAR(255) NOT NULL,
+    
+  )`;
+
+  const tables = [
+    userTableQuery,
+    busesTableQuery,
+    bookingTableQuery,
+    payementsTableQuery,
+  ];
+
+  tables.forEach((tables) => {
+    connection.execute(tables, (err, result) => {
+      if (err) {
+        console.log(err);
+        return;
+      }
+      console.log(result);
+    });
   });
 });
 
