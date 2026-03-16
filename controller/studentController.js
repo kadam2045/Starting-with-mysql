@@ -1,5 +1,17 @@
 const dbConnection = require("../utils/db-connection");
 
+const getEntries = (req, res) => {
+  const fetchStudentsQuery = `SELECT * FROM students`;
+  dbConnection.execute(fetchStudentsQuery, (err, result) => {
+    if (err) {
+      console.log("error while fetching", err);
+      res.status(500).json({ message: "error while fetching" });
+      dbConnection.end();
+      return;
+    }
+    res.status(200).json({ message: result });
+  });
+};
 const addEntries = (req, res) => {
   const { name, email, password } = req.body;
   const insertQuery = `INSERT INTO students (name, email, password) VALUES (?, ?, ?)`;
@@ -40,7 +52,7 @@ const updateEntries = (req, res) => {
 
 const deleteEntries = (req, res) => {
   const { id } = req.params;
-  const deleteQuery = `DELETE FROM students WHERE id = ?`;
+  const deleteQuery = `DELETE FROM buses WHERE id = ?`;
 
   dbConnection.execute(deleteQuery, [id], (err, result) => {
     if (err) {
@@ -65,4 +77,5 @@ module.exports = {
   addEntries,
   updateEntries,
   deleteEntries,
+  getEntries,
 };

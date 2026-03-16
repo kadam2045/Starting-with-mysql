@@ -2,9 +2,11 @@ const express = require("express");
 const app = express();
 const db = require("./utils/db-connection");
 const studentRoute = require("./routes/studentsRoute");
+const busRoute = require("./routes/busRoute");
 
 app.use(express.json());
 app.use("/students", studentRoute);
+app.use("/buses", busRoute);
 
 app.get("/", (req, res) => {
   res.send("Hello World!");
