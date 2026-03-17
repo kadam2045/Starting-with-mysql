@@ -1,76 +1,110 @@
 const dbConnection = require("../utils/db-connection");
+const Student = require("../models/student");
 
-const getEntries = (req, res) => {
-  const fetchStudentsQuery = `SELECT * FROM students`;
-  dbConnection.execute(fetchStudentsQuery, (err, result) => {
-    if (err) {
-      console.log("error while fetching", err);
-      res.status(500).json({ message: "error while fetching" });
-      dbConnection.end();
-      return;
-    }
-    res.status(200).json({ message: result });
-  });
-};
-const addEntries = (req, res) => {
-  const { name, email, password } = req.body;
-  const insertQuery = `INSERT INTO students (name, email, password) VALUES (?, ?, ?)`;
-
-  dbConnection.execute(insertQuery, [name, email, password], (err) => {
-    if (err) {
-      console.log("error while inserting", err);
-      res.status(500).json({ message: "error while inserting" });
-      dbConnection.end();
-      return;
-    }
-    res.status(200).json({ message: `inserted ${name} and ${email}` });
-  });
-};
-
-const updateEntries = (req, res) => {
-  const { id } = req.params;
-  const { name, email } = req.body;
-  const updateQuery = `UPDATE students SET name = ? , email = ? WHERE id = ?`;
-
-  dbConnection.execute(updateQuery, [name, email, id], (err, result) => {
-    if (err) {
-      console.log("error while updating", err);
-      res.status(500).json({ message: "error while updating" });
-      dbConnection.end();
-      return;
-    }
-
-    if (result.affectedRows === 0) {
-      res.status(404).json({ message: `no student found with id ${id}` });
-      dbConnection.end();
-      return;
-    }
-
-    res.status(200).json({ message: `student updated successfully` });
-  });
-};
-
-const deleteEntries = (req, res) => {
-  const { id } = req.params;
-  const deleteQuery = `DELETE FROM buses WHERE id = ?`;
-
-  dbConnection.execute(deleteQuery, [id], (err, result) => {
-    if (err) {
-      console.log("error while deleting", err);
-      res.status(500).json({ message: "error while  deleteing" });
-      dbConnection.end();
-      return;
-    }
-
-    if (result.affectedRows === 0) {
-      res.status(404).json({ message: `no student found with id ${id}` });
-      dbConnection.end();
+const getEntries = async (req, res) => {
+  try {
+    const students = await Student.findAll();
+    if (!students) {
+      res.status(404).json({ message: "Students not found" });
       return;
     }
     res
       .status(200)
-      .json({ message: `student with id ${id} deleted successfully` });
-  });
+      .json({ message: "Students fetched successfully", data: students });
+  } catch (error) {
+    console.log("error while fetching", error);
+    res.status(500).json({ message: "error while fetching" });
+  }
+};
+
+const getStudentsByID = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const student = await Student.findOne({
+      where: {
+        id: id,
+      },
+    });
+
+    console.log("student", student);
+    if (!student) {
+      res.status(404).json({ message: "student not found" });
+      return;
+    }
+    res.status(200).json({ data: student });
+  } catch (error) {
+    console.log("error while fetching", error);
+    res.status(500).json({ message: "error while fetching" });
+  }
+};
+const addEntries = async (req, res) => {
+  try {
+    const { name, email } = req.body;
+    const student = await Student.create({
+      name: name,
+      email: email,
+    });
+    res.status(200).json({ message: student });
+  } catch (error) {
+    console.log("error while inserting", error);
+    res.status(500).json({ message: "error while inserting" });
+  }
+
+  // const insertQuery = `INSERT INTO students (name, email, password) VALUES (?, ?, ?)`;
+
+  // dbConnection.execute(insertQuery, [name, email, password], (err) => {
+  //   if (err) {
+  //     console.log("error while inserting", err);
+  //     res.status(500).json({ message: "error while inserting" });
+  //     dbConnection.end();
+  //     return;
+  //   }
+  //   res.status(200).json({ message: `inserted ${name} and ${email}` });
+  // });
+};
+
+const updateEntries = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, email } = req.body;
+
+    const student = await Student.findByPk(id);
+    if (!student) {
+      res.status(404).json({ message: "Student not found" });
+      return;
+    }
+
+    student.name = name;
+    student.email = email;
+
+    await student.save();
+
+    res.status(200).json({ data: student });
+  } catch (error) {
+    console.log("error while updating", error);
+    res.status(500).json({ message: "error while updating" });
+  }
+};
+
+const deleteEntries = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const student = await Student.destroy({
+      where: {
+        id: id,
+      },
+    });
+    if (!student) {
+      res.status(404).json({ message: "Student not found" });
+      return;
+    }
+
+    res.status(201).json({ message: " Student deleted Sucessfully" });
+  } catch (error) {
+    console.log("error while deleting", error);
+    res.status(500).json({ message: "error while deleting" });
+  }
 };
 
 module.exports = {
@@ -78,4 +112,5 @@ module.exports = {
   updateEntries,
   deleteEntries,
   getEntries,
+  getStudentsByID,
 };

@@ -11,7 +11,7 @@ app.use(express.json());
 app.use("/students", studentRoute);
 app.use("/buses", busRoute);
 
-db.sync({ force: true })
+db.sync()
   .then(() => {
     app.listen(3000, () => {
       console.log("Server started on port 3000");
