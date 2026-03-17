@@ -26,7 +26,6 @@ const getStudentsByID = async (req, res) => {
       },
     });
 
-    console.log("student", student);
     if (!student) {
       res.status(404).json({ message: "student not found" });
       return;
