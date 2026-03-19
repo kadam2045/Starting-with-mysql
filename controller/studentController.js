@@ -1,5 +1,7 @@
 const dbConnection = require("../utils/db-connection");
 const Student = require("../models/student");
+const IdentityCard = require("../models/IdentiyCard");
+const Posts = require("../models/Posts");
 
 const getEntries = async (req, res) => {
   try {
@@ -106,10 +108,53 @@ const deleteEntries = async (req, res) => {
   }
 };
 
+const createStudentWithIdentityCard = async (req, res) => {
+  try {
+    const student = await Student.create(req.body.student);
+
+    const identityCard = await IdentityCard.create({
+      ...req.body.identityCard,
+      StudentId: student.id,
+    });
+
+    res.status(200).json({ student, identityCard });
+  } catch (error) {
+    console.log("error while creating", error);
+    res.status(500).json({ message: "error while creating" });
+  }
+};
+
+const createPostsWithStudent = async (req, res) => {
+  try {
+    //payload
+    // {
+    //   "student": {
+    //     "name": "John Doe",
+    //     "email": "[EMAIL_ADDRESS]"
+    //   },
+    //   "posts": {
+    //     "title": "John Doe",
+    //     "content": "John Doe"
+    //   }
+    // }
+    const student = await Student.create(req.body.student);
+    const posts = await Posts.create({
+      ...req.body.posts,
+      StudentId: student.id,
+    });
+    res.status(200).json({ student, posts });
+  } catch (error) {
+    console.log("error while creating", error);
+    res.status(500).json({ message: "error while creating" });
+  }
+};
+
 module.exports = {
   addEntries,
   updateEntries,
   deleteEntries,
   getEntries,
   getStudentsByID,
+  createStudentWithIdentityCard,
+  createPostsWithStudent,
 };
